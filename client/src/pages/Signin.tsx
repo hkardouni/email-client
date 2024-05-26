@@ -1,5 +1,12 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { UseDispatch, useDispatch, useSelector } from "react-redux";
+import {
+  signInStart,
+  signInFailure,
+  signInSuccess,
+} from "../redux/user/userSlice";
+import { RootState } from "../redux/store";
 
 interface FormData {
   [key: string]: string;
@@ -7,11 +14,11 @@ interface FormData {
 
 const Signin: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({});
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const useAppSelector = useSelector.withTypes<RootState>();
+  const {loading, error} = useAppSelector((state) => state.user)
 
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -23,7 +30,7 @@ const Signin: React.FC = () => {
     e.preventDefault();
 
     try {
-      setLoading(true)
+      dispatch(signInStart());
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
@@ -33,18 +40,14 @@ const Signin: React.FC = () => {
       });
       const data = await res.json();
       if (data.success === false) {
-        setError(data.message)
-        setLoading(false)
-        return
+        dispatch(signInFailure(data.message));
+        return;
       }
-      setLoading(false)
-      setError(null)
-      navigate('/')
+      dispatch(signInSuccess(data));
+      navigate("/");
     } catch (err: any) {
-      setLoading(false)
-      setError(err.message)
+      dispatch(signInFailure(err.message))
     }
-    
   };
 
   return (
@@ -65,8 +68,11 @@ const Signin: React.FC = () => {
           id="password"
           onChange={handleChange}
         />
-        <button disabled={loading} className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80">
-          {loading? 'Loading...' : 'Sign In'}
+        <button
+          disabled={loading}
+          className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
+        >
+          {loading ? "Loading..." : "Sign In"}
         </button>
       </form>
       <div className="flex gap-2 mt-5">
