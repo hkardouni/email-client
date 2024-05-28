@@ -7,6 +7,8 @@ import {
   signInSuccess,
 } from "../redux/user/userSlice";
 import { RootState } from "../redux/store";
+import { OAuth } from "../components/OAuth";
+
 
 interface FormData {
   [key: string]: string;
@@ -74,6 +76,7 @@ const Signin: React.FC = () => {
         >
           {loading ? "Loading..." : "Sign In"}
         </button>
+        <OAuth />
       </form>
       <div className="flex gap-2 mt-5">
         <p>Dont Have an account?</p>
